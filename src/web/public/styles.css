@@ -1,0 +1,142 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+    Cantarell, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.quiz-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgb(0 0 0 / 10%);
+  padding: 40px;
+}
+
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+  font-size: 2.5em;
+  font-weight: 300;
+}
+
+.question {
+  margin-bottom: 30px;
+  padding: 25px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.question p {
+  font-size: 1.2em;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+label {
+  display: block;
+  padding: 10px 15px;
+  margin-top: 8px;
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1em;
+}
+
+label:hover {
+  border-color: #667eea;
+  background: #f0f2ff;
+}
+
+input[type='radio'] {
+  margin-right: 10px;
+}
+
+input[type='radio']:checked + label {
+  border-color: #667eea;
+  background: #667eea;
+  color: white;
+}
+
+button[type='submit'] {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 40px auto 0;
+  padding: 15px 30px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+button[type='submit']:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgb(102 126 234 / 30%);
+}
+
+button[type='submit']:active {
+  transform: translateY(0);
+}
+
+@media (width <= 768px) {
+  .quiz-container {
+    padding: 20px;
+    margin: 10px;
+  }
+
+  h1 {
+    font-size: 2em;
+  }
+
+  .question {
+    padding: 20px;
+  }
+}
+
+code {
+  background: #f1f3f4;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family:
+    'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New',
+    monospace;
+  font-size: 0.9em;
+  color: #d63384;
+  border: 1px solid #e9ecef;
+}
+
+/* Optional: Different styling for code inside labels/choices */
+label code {
+  background: #e8f4fd;
+  color: #0969da;
+  border: 1px solid #d1e9ff;
+}
+
+/* Updated code styling - remove :has() selector */
+label.selected code {
+  background: rgb(255 255 255 / 20%);
+  color: white;
+  border: 1px solid rgb(255 255 255 / 30%);
+}

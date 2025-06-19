@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="/styles.css">
+  
+  <!-- Primary favicon (ICO for broad compatibility) -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  
+  <!-- PNG favicons for better quality -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  
+  <!-- Android Chrome -->
+  <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+  
+  <!-- Apple devices -->
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  
+  <title>PR Quiz</title>
+</head>
+<body>
+  <div class="quiz-container">
+    <h1>📝 PR Quiz</h1>
+    <form action="/submit" method="POST">
+      <% quiz.questions.forEach((q, index) => { %>
+        <div class="question">
+          <p><%= index + 1 %>. <%- marked.parseInline(q.question) %></p>
+          <% Object.entries(q.choices).forEach(([letter, text]) => { %>
+            <label>
+              <input type="radio" name="<%= index %>" value="<%= letter %>" <% if (answers && answers[index.toString()] === letter) { %>checked<% } %> required>
+              <%= letter.toUpperCase() %>. <%- marked.parseInline(text) %>
+            </label><br>
+          <% }) %>
+        </div>
+      <% }) %>
+      <button type="submit">Submit Answers</button>
+    </form>
+  </div>
+</body>
+</html>

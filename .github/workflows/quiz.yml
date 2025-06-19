@@ -1,0 +1,32 @@
+name: Quiz
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  quiz:
+    name: PR Quiz
+    runs-on: ubuntu-latest
+    environment: pr-quiz
+    if: github.event.review.state == 'approved'
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Serve Quiz
+        id: serve-quiz
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          ngrok-authtoken: ${{ secrets.NGROK_AUTHTOKEN }}
+          minimum-lines-changed: 10
+          exclude-file-patterns:
+            '["package-lock.json", "**/*.lock", "**/*.map", "dist/*"]'

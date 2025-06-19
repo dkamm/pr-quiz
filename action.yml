@@ -1,0 +1,73 @@
+name: PR Quiz
+description:
+  An AI generated quiz for your AI agent's pull requests. Make sure you actually
+  understand the code it writes!
+author: dkamm
+
+branding:
+  icon: cpu
+  color: blue
+
+inputs:
+  github-token:
+    description: GitHub token for API access
+    required: true
+  openai-api-key:
+    description: OpenAI API key for API access
+    required: true
+  ngrok-authtoken:
+    description: The ngrok authtoken to use for the server hosting the quiz.
+    required: true
+  model:
+    description:
+      The model to use for generating the quiz.  It must be a model that
+      supports structured outputs. Defaults to 'gpt-4o'.
+    required: false
+    default: 'gpt-4o'
+  lines-changed-threshold:
+    description:
+      The minimum number of lines changed required to create a quiz. This is to
+      prevent quizzes from being created for small pull requests.
+    required: false
+    default: '100'
+  time-limit-minutes:
+    description:
+      The time limit to complete the quiz in minutes. This prevents the action
+      from running indefinitely.
+    required: false
+    default: '10'
+  exclude-file-patterns:
+    description:
+      A list of file patterns to exclude from the quiz as a JSON-ified string.
+    required: false
+    default:
+      '["**/*-lock.json", "**/*-lock.yaml", "**/*.lock", "**/*.map",
+      "**/*.pb.*", "**/*_pb2.py", "**/*.generated.*", "**/*.auto.*"]'
+  system-prompt:
+    description:
+      Optional override for the system prompt. Be sure the specify that multiple
+      choice questions must be returned.
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    - name: Install external dependencies
+      run: npm install @ngrok/ngrok ejs express
+      shell: bash
+    - name: Run action
+      run: npx node dist/index.cjs
+      shell: bash
+      env:
+        INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
+        INPUT_OPENAI_API_KEY: ${{ inputs.openai-api-key }}
+        INPUT_NGROK_AUTHTOKEN: ${{ inputs.ngrok-authtoken }}
+        INPUT_LINES_CHANGED_THRESHOLD: ${{ inputs.lines-changed-threshold }}
+        INPUT_TIME_LIMIT_MINUTES: ${{ inputs.time-limit-minutes }}
+        INPUT_EXCLUDE_FILE_PATTERNS: ${{ inputs.exclude-file-patterns }}
+        INPUT_MODEL: ${{ inputs.model }}
+        INPUT_SYSTEM_PROMPT: ${{ inputs.system-prompt }}
