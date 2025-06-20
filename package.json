@@ -1,20 +1,27 @@
 {
-  "name": "javascript-action",
-  "description": "GitHub Actions JavaScript Template",
-  "version": "0.0.0",
-  "author": "",
+  "name": "pr-quiz",
+  "description": "A GitHub Action that generates a quiz from your AI agent's pull request. Make sure you understand the code it writes!", 
+  "version": "0.0.1",
+  "author": "David Kamm",
   "type": "module",
   "private": true,
-  "homepage": "https://github.com/actions/javascript-action#readme",
+  "homepage": "https://github.com/dkamm/pr-quiz#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/javascript-action.git"
+    "url": "git+https://github.com/dkamm/pr-quiz.git"
   },
   "bugs": {
-    "url": "https://github.com/actions/javascript-action/issues"
+    "url": "https://github.com/dkamm/pr-quiz/issues"
   },
   "keywords": [
-    "actions"
+    "actions",
+    "github",
+    "github-action",
+    "quiz",
+    "ai",
+    "code-review",
+    "assessment",
+    "developer-tools"
   ],
   "exports": {
     ".": "./dist/index.cjs"

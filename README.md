@@ -1,4 +1,4 @@
-# PR Quiz - Make sure you understand your AI agent's code!
+# PR Quiz
 
 [![GitHub Super-Linter](https://github.com/dkamm/pr-quiz/actions/workflows/linter.yml/badge.svg)](https://github.com/super-linter/super-linter)
 ![CI](https://github.com/dkamm/pr-quiz/actions/workflows/ci.yml/badge.svg)
@@ -10,8 +10,8 @@ stamp it will grow stronger. This could lead to an increase in all types of
 problems like bugs, security vulnerabilities or opportunities for unaligned
 agents to sneak in malicious code.
 
-PR Quiz serves as one line of defense against this by prompting human reviewers to
-test their understanding of the code they "reviewed" before merging.
+PR Quiz serves as one line of defense against this by prompting human reviewers
+to test their understanding of the code they "reviewed" before merging.
 
 ## Getting started
 
@@ -71,7 +71,7 @@ runner and uses ngrok to create a public tunnel to it
 | minimum-lines-changed | The minimum number of lines changed required to create a quiz. This is to prevent quizzes from being created for small pull requests. | `100`                                                                                                                            | No       |
 | time-limit-minutes    | The time limit to complete the quiz in minutes. This prevents the action from running indefinitely.                                   | `10`                                                                                                                             | No       |
 | exclude-file-patterns | A list of file patterns to exclude from the quiz as a JSON-ified string.                                                              | `'["**/*-lock.json", "**/*-lock.yaml", "**/*.lock", "**/*.map", "**/*.pb.*", "**/*_pb2.py", "**/*.generated.*", "**/*.auto.*"]'` | No       |
-| system-prompt         | Optional override for the system prompt. Be sure the specify that multiple choice questions must be returned.                         | See [here](https://github.com/dkamm/pr-quiz/blob/main/src/quiz/DefaultSystemPrompt.js) for the default system prompt           | No       |
+| system-prompt         | Optional override for the system prompt. Be sure the specify that multiple choice questions must be returned.                         | See [here](https://github.com/dkamm/pr-quiz/blob/main/src/quiz/DefaultSystemPrompt.js) for the default system prompt             | No       |
 
 ## Privacy & Security
 
