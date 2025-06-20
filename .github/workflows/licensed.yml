@@ -5,15 +5,12 @@
 name: Licensed
 
 on:
-  # Uncomment the below lines to run this workflow on pull requests and pushes
-  # to the default branch. This is useful for checking licenses before merging
-  # changes into the default branch.
-  # pull_request:
-  #   branches:
-  #     - main
-  # push:
-  #   branches:
-  #     - main
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
