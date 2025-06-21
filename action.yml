@@ -59,9 +59,11 @@ runs:
     - name: Install external dependencies
       run: npm install @ngrok/ngrok ejs express
       shell: bash
+      working-directory: ${{ github.action_path }}
     - name: Run action
       run: npx node dist/index.cjs
       shell: bash
+      working-directory: ${{ github.action_path }}
       env:
         INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
         INPUT_OPENAI_API_KEY: ${{ inputs.openai-api-key }}
