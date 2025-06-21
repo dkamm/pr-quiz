@@ -38,7 +38,7 @@ jobs:
   quiz:
     name: PR Quiz
     runs-on: ubuntu-latest
-    environment: pr-quiz
+    environment: dev # TODO: change this to your environment
     # Only trigger on approvals to save tokens
     if: github.event.review.state == 'approved'
 
@@ -54,7 +54,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           ngrok-authtoken: ${{ secrets.NGROK_AUTHTOKEN }}
-          minimum-lines-changed: 10
 ```
 
 \*The PR Quiz action creates a temporary webserver inside the GitHub Actions
@@ -62,16 +61,16 @@ runner and uses ngrok to create a public tunnel to it
 
 ## Inputs
 
-| Name                  | Description                                                                                                                           | Default Value                                                                                                                    | Required |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| github-token          | GitHub token for API access                                                                                                           | -                                                                                                                                | Yes      |
-| ngrok-authtoken       | The ngrok authtoken to use for the server hosting the quiz.                                                                           | -                                                                                                                                | Yes      |
-| openai-api-key        | OpenAI API key for API access                                                                                                         | -                                                                                                                                | Yes      |
-| model                 | The model to use for generating the quiz. It must be a model that supports structured outputs.                                        | `gpt-4o`                                                                                                                         | No       |
-| minimum-lines-changed | The minimum number of lines changed required to create a quiz. This is to prevent quizzes from being created for small pull requests. | `100`                                                                                                                            | No       |
-| time-limit-minutes    | The time limit to complete the quiz in minutes. This prevents the action from running indefinitely.                                   | `10`                                                                                                                             | No       |
-| exclude-file-patterns | A list of file patterns to exclude from the quiz as a JSON-ified string.                                                              | `'["**/*-lock.json", "**/*-lock.yaml", "**/*.lock", "**/*.map", "**/*.pb.*", "**/*_pb2.py", "**/*.generated.*", "**/*.auto.*"]'` | No       |
-| system-prompt         | Optional override for the system prompt. Be sure the specify that multiple choice questions must be returned.                         | See [here](https://github.com/dkamm/pr-quiz/blob/main/src/quiz/DefaultSystemPrompt.js) for the default system prompt             | No       |
+| Name                    | Description                                                                                                                           | Default Value                                                                                                                    | Required |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| github-token            | GitHub token for API access                                                                                                           | -                                                                                                                                | Yes      |
+| ngrok-authtoken         | The ngrok authtoken to use for the server hosting the quiz.                                                                           | -                                                                                                                                | Yes      |
+| openai-api-key          | OpenAI API key for API access                                                                                                         | -                                                                                                                                | Yes      |
+| model                   | The model to use for generating the quiz. It must be a model that supports structured outputs.                                        | `gpt-4o`                                                                                                                         | No       |
+| lines-changed-threshold | The minimum number of lines changed required to create a quiz. This is to prevent quizzes from being created for small pull requests. | `100`                                                                                                                            | No       |
+| time-limit-minutes      | The time limit to complete the quiz in minutes. This prevents the action from running indefinitely.                                   | `10`                                                                                                                             | No       |
+| exclude-file-patterns   | A list of file patterns to exclude from the quiz as a JSON-ified string.                                                              | `'["**/*-lock.json", "**/*-lock.yaml", "**/*.lock", "**/*.map", "**/*.pb.*", "**/*_pb2.py", "**/*.generated.*", "**/*.auto.*"]'` | No       |
+| system-prompt           | Optional override for the system prompt. Be sure the specify that multiple choice questions must be returned.                         | See [here](https://github.com/dkamm/pr-quiz/blob/main/src/quiz/DefaultSystemPrompt.js) for the default system prompt             | No       |
 
 ## Privacy & Security
 

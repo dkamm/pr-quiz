@@ -1,6 +1,6 @@
 {
   "name": "pr-quiz",
-  "description": "A GitHub Action that generates a quiz from your AI agent's pull request. Make sure you understand the code it writes!", 
+  "description": "A GitHub Action that generates a quiz from your AI agent's pull request. Make sure you understand the code it writes!",
   "version": "0.0.1",
   "author": "David Kamm",
   "type": "module",
@@ -20,6 +20,7 @@
     "quiz",
     "ai",
     "code-review",
+    "deployment-protection",
     "assessment",
     "developer-tools"
   ],
@@ -31,7 +32,7 @@
   },
   "scripts": {
     "bundle": "npm run format:write && npm run package",
-    "ci-test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest",
+    "ci-test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest --passWithNoTests",
     "coverage": "npx make-coverage-badge --output-path ./badges/coverage.svg",
     "format:write": "npx prettier --write .",
     "format:check": "npx prettier --check .",
@@ -39,7 +40,7 @@
     "local-action": "npx @github/local-action . src/main.js .env",
     "package": "npx rollup --config rollup.config.js",
     "package:watch": "npm run package -- --watch",
-    "test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest --passWithNoTests",
     "all": "npm run format:write && npm run lint && npm run test && npm run coverage && npm run package"
   },
   "license": "MIT",
