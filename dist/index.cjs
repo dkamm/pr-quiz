@@ -55101,6 +55101,25 @@ async function run() {
     excludeFilePatterns: JSON.parse(process.env.INPUT_EXCLUDE_FILE_PATTERNS),
     systemPrompt: process.env.INPUT_SYSTEM_PROMPT || DefaultSystemPrompt
   };
+  // Check required inputs were provided. Have to manually check because we're using a composite action :(
+  if (!config.githubToken) {
+    coreExports.setFailed(
+      '🚫 GitHub token is required. Double check your workflow configuration.'
+    );
+    process.exit(1);
+  }
+  if (!config.openaiApiKey) {
+    coreExports.setFailed(
+      '🚫 OpenAI API key is required. Double check your workflow configuration.'
+    );
+    process.exit(1);
+  }
+  if (!config.ngrokAuthToken) {
+    coreExports.setFailed(
+      '🚫 Ngrok auth token is required. Double check your workflow configuration.'
+    );
+    process.exit(1);
+  }
 
   // Create Github client
   const octokit = new Octokit({ auth: config.githubToken });
