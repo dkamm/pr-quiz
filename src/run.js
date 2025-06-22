@@ -22,6 +22,7 @@ async function run() {
     openaiApiKey: process.env.INPUT_OPENAI_API_KEY,
     ngrokAuthToken: process.env.INPUT_NGROK_AUTHTOKEN,
     linesChangedThreshold: parseInt(process.env.INPUT_LINES_CHANGED_THRESHOLD),
+    maxAttempts: parseInt(process.env.INPUT_MAX_ATTEMPTS),
     model: process.env.INPUT_MODEL,
     timeLimitMinutes: parseInt(process.env.INPUT_TIME_LIMIT_MINUTES),
     excludeFilePatterns: JSON.parse(process.env.INPUT_EXCLUDE_FILE_PATTERNS),
@@ -67,12 +68,12 @@ async function run() {
   // Check if the pull request is too small to create a quiz
   if (pullRequest.getLinesOfCodeChanged() < config.linesChangedThreshold) {
     core.info(
-      `🚫 Pull request is too small to create a quiz (${config.linesChangedThreshold} lines required)`
+      `🚫 Pull request is too small to create a quiz (${config.linesChangedThreshold} lines required).`
     )
     return
   } else {
     core.info(
-      `🔍 Pull request has ${pullRequest.getLinesOfCodeChanged()} lines of code changed`
+      `🔍 Pull request has ${pullRequest.getLinesOfCodeChanged()} lines of code changed.`
     )
   }
 
@@ -94,16 +95,35 @@ async function run() {
 └──────────────────┴──────────┘`)
 
   // Create server
-  const onCorrect = () => {
-    core.info('🎉 Quiz passed!')
+  let server = null
+  const onQuizPassed = (attempts) => {
+    core.info(
+      `🎉 Quiz passed after ${attempts} attempt${attempts === 1 ? '' : 's'}!`
+    )
+    // Wait some time before shutting down to allow user to see rendered page
+    setTimeout(async () => {
+      await server.shutdown()
+    }, 2000)
   }
-  const onIncorrect = () => {
-    core.info('🚫 Quiz failed. Try again!')
+  const onQuizFailed = (attempts) => {
+    core.setFailed(
+      `🚫 Quiz failed after ${attempts} attempt${attempts === 1 ? '' : 's'}.`
+    )
+    // Wait some time before shutting down to allow user to see rendered page
+    setTimeout(async () => {
+      await server.shutdown()
+      process.exit(1)
+    }, 2000)
   }
-  const server = new Server({
+  server = new Server({
+    app: createApp({
+      quiz,
+      pullRequestUrl: pullRequest.html_url,
+      onQuizPassed,
+      onQuizFailed,
+      maxAttempts: config.maxAttempts
+    }),
     port: 3000,
-    createApp: (onShutdown) =>
-      createApp(onShutdown, quiz, pullRequest.html_url, onCorrect, onIncorrect),
     ngrokAuthToken: config.ngrokAuthToken
   })
 
@@ -118,7 +138,7 @@ async function run() {
     async () => {
       await server.shutdown()
       // Fail the action if time limit is reached
-      core.setFailed('🕒 Failed to complete quiz in time')
+      core.setFailed('🕒 Failed to complete quiz in time.')
       // Need to actually exit the process with an error code to fail the action
       process.exit(1)
     },

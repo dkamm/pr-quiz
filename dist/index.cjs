@@ -41609,13 +41609,13 @@ OpenAI.Evals = Evals;
 OpenAI.Containers = Containers;
 
 class Server {
-  constructor({ port = 3000, createApp, ngrokAuthToken }) {
+  constructor({ app, port = 3000, ngrokAuthToken }) {
+    this.app = app;
     this.port = port;
     this.connections = new Set();
     this.server = null;
     this.listener = null;
     this.ngrokUrl = null;
-    this.createApp = createApp;
     this.ngrokAuthToken = ngrokAuthToken;
     this.shouldLog = process.env.GITHUB_ACTIONS !== 'true';
   }
@@ -41627,9 +41627,7 @@ class Server {
   }
 
   async start() {
-    const app = this.createApp(this.shutdown.bind(this));
-
-    this.server = app.listen(this.port, () => {
+    this.server = this.app.listen(this.port, () => {
       this.log(`Server running on port ${this.port}`);
     });
 
@@ -41646,23 +41644,25 @@ class Server {
           this.log(`Ngrok status: ${status}`);
         }
       });
-      this.ngrokUrl = this.listener.url();
-      this.log(`Ngrok URL: ${this.ngrokUrl}`);
     }
   }
 
   getUrl() {
-    return this.ngrokUrl
+    if (this.listener) {
+      return this.listener.url()
+    } else {
+      return `http://localhost:${this.port}`
+    }
   }
 
   async shutdown() {
     this.log('Shutting down...');
     this.connections.forEach((socket) => socket.destroy());
     this.server.close(async () => {
-      await this.listener.close();
-      process.exit(0);
+      if (this.listener) {
+        await this.listener.close();
+      }
     });
-    setTimeout(() => process.exit(1), 5000);
   }
 }
 
@@ -47578,7 +47578,13 @@ function checkAnswers(answers, questions) {
   )
 }
 
-function createApp(onShutdown, quiz, pullRequestUrl, onCorrect, onIncorrect) {
+function createApp({
+  quiz,
+  pullRequestUrl,
+  onQuizPassed,
+  onQuizFailed,
+  maxAttempts = 3
+}) {
   const app = express();
 
   // Session middleware for storing quiz answers
@@ -47590,6 +47596,14 @@ function createApp(onShutdown, quiz, pullRequestUrl, onCorrect, onIncorrect) {
       cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 } // 1 day
     })
   );
+
+  // Initialize attempts counter
+  app.use((req, _res, next) => {
+    if (req.session.attempts === undefined) {
+      req.session.attempts = 0;
+    }
+    next();
+  });
 
   // Middleware for parsing urlencoded form data
   app.use(express.urlencoded({ extended: true }));
@@ -47605,7 +47619,9 @@ function createApp(onShutdown, quiz, pullRequestUrl, onCorrect, onIncorrect) {
     res.render('quiz', {
       quiz: quiz,
       marked: marked,
-      answers: req.session.answers
+      answers: req.session.answers,
+      attempt: req.session.attempts + 1,
+      maxAttempts
     });
   });
 
@@ -47615,20 +47631,25 @@ function createApp(onShutdown, quiz, pullRequestUrl, onCorrect, onIncorrect) {
     // Store answers in session
     req.session.answers = answers;
 
+    // Increment attempts counter
+    req.session.attempts++;
+
     // Check if answers are correct
     if (checkAnswers(answers, quiz.questions)) {
-      res.render('correct', { pullRequestUrl });
-      if (onCorrect) {
-        onCorrect();
-      }
-      // Wait some time before shutting down to allow the user to see the correct answer
-      new Promise((resolve) => setTimeout(resolve, 2000)).then(() => {
-        onShutdown();
+      res.render('pass', {
+        pullRequestUrl,
+        attempts: req.session.attempts,
+        maxAttempts
       });
+      onQuizPassed(req.session.attempts);
     } else {
-      res.render('incorrect');
-      if (onIncorrect) {
-        onIncorrect();
+      const attemptsLeft =
+        maxAttempts > 0 ? maxAttempts - req.session.attempts : Math.Infinity;
+      if (attemptsLeft <= 0) {
+        res.render('fail', { pullRequestUrl });
+        onQuizFailed(req.session.attempts);
+      } else {
+        res.render('tryagain', { pullRequestUrl, attemptsLeft });
       }
     }
   });
@@ -55096,6 +55117,7 @@ async function run() {
     openaiApiKey: process.env.INPUT_OPENAI_API_KEY,
     ngrokAuthToken: process.env.INPUT_NGROK_AUTHTOKEN,
     linesChangedThreshold: parseInt(process.env.INPUT_LINES_CHANGED_THRESHOLD),
+    maxAttempts: parseInt(process.env.INPUT_MAX_ATTEMPTS),
     model: process.env.INPUT_MODEL,
     timeLimitMinutes: parseInt(process.env.INPUT_TIME_LIMIT_MINUTES),
     excludeFilePatterns: JSON.parse(process.env.INPUT_EXCLUDE_FILE_PATTERNS),
@@ -55141,12 +55163,12 @@ async function run() {
   // Check if the pull request is too small to create a quiz
   if (pullRequest.getLinesOfCodeChanged() < config.linesChangedThreshold) {
     coreExports.info(
-      `🚫 Pull request is too small to create a quiz (${config.linesChangedThreshold} lines required)`
+      `🚫 Pull request is too small to create a quiz (${config.linesChangedThreshold} lines required).`
     );
     return
   } else {
     coreExports.info(
-      `🔍 Pull request has ${pullRequest.getLinesOfCodeChanged()} lines of code changed`
+      `🔍 Pull request has ${pullRequest.getLinesOfCodeChanged()} lines of code changed.`
     );
   }
 
@@ -55168,16 +55190,35 @@ async function run() {
 └──────────────────┴──────────┘`);
 
   // Create server
-  const onCorrect = () => {
-    coreExports.info('🎉 Quiz passed!');
+  let server = null;
+  const onQuizPassed = (attempts) => {
+    coreExports.info(
+      `🎉 Quiz passed after ${attempts} attempt${attempts === 1 ? '' : 's'}!`
+    );
+    // Wait some time before shutting down to allow user to see rendered page
+    setTimeout(async () => {
+      await server.shutdown();
+    }, 2000);
   };
-  const onIncorrect = () => {
-    coreExports.info('🚫 Quiz failed. Try again!');
+  const onQuizFailed = (attempts) => {
+    coreExports.setFailed(
+      `🚫 Quiz failed after ${attempts} attempt${attempts === 1 ? '' : 's'}.`
+    );
+    // Wait some time before shutting down to allow user to see rendered page
+    setTimeout(async () => {
+      await server.shutdown();
+      process.exit(1);
+    }, 2000);
   };
-  const server = new Server({
+  server = new Server({
+    app: createApp({
+      quiz,
+      pullRequestUrl: pullRequest.html_url,
+      onQuizPassed,
+      onQuizFailed,
+      maxAttempts: config.maxAttempts
+    }),
     port: 3000,
-    createApp: (onShutdown) =>
-      createApp(onShutdown, quiz, pullRequest.html_url, onCorrect, onIncorrect),
     ngrokAuthToken: config.ngrokAuthToken
   });
 
@@ -55192,7 +55233,7 @@ async function run() {
     async () => {
       await server.shutdown();
       // Fail the action if time limit is reached
-      coreExports.setFailed('🕒 Failed to complete quiz in time');
+      coreExports.setFailed('🕒 Failed to complete quiz in time.');
       // Need to actually exit the process with an error code to fail the action
       process.exit(1);
     },

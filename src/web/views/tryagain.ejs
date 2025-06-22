@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="/styles.css">
+  <title>PR Quiz</title>
+</head>
+<body>
+  <div class="quiz-container">
+    <% if (Number.isFinite(attemptsLeft)) { %>
+        <p class="attempt-counter"><%= attemptsLeft %> attempt<%= attemptsLeft === 1 ? '' : 's' %> left</p>
+    <% } %>
+    <h1>⚠️ Incorrect! Try again.</h1>
+    <button type="submit" onclick="window.location.href='/';">Back to quiz</button>
+  </div>
+</body>
+</html>

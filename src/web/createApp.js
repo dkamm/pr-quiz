@@ -16,7 +16,13 @@ function checkAnswers(answers, questions) {
   )
 }
 
-function createApp(onShutdown, quiz, pullRequestUrl, onCorrect, onIncorrect) {
+function createApp({
+  quiz,
+  pullRequestUrl,
+  onQuizPassed,
+  onQuizFailed,
+  maxAttempts = 3
+}) {
   const app = express()
 
   // Session middleware for storing quiz answers
@@ -28,6 +34,14 @@ function createApp(onShutdown, quiz, pullRequestUrl, onCorrect, onIncorrect) {
       cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 } // 1 day
     })
   )
+
+  // Initialize attempts counter
+  app.use((req, _res, next) => {
+    if (req.session.attempts === undefined) {
+      req.session.attempts = 0
+    }
+    next()
+  })
 
   // Middleware for parsing urlencoded form data
   app.use(express.urlencoded({ extended: true }))
@@ -43,7 +57,9 @@ function createApp(onShutdown, quiz, pullRequestUrl, onCorrect, onIncorrect) {
     res.render('quiz', {
       quiz: quiz,
       marked: marked,
-      answers: req.session.answers
+      answers: req.session.answers,
+      attempt: req.session.attempts + 1,
+      maxAttempts
     })
   })
 
@@ -53,20 +69,25 @@ function createApp(onShutdown, quiz, pullRequestUrl, onCorrect, onIncorrect) {
     // Store answers in session
     req.session.answers = answers
 
+    // Increment attempts counter
+    req.session.attempts++
+
     // Check if answers are correct
     if (checkAnswers(answers, quiz.questions)) {
-      res.render('correct', { pullRequestUrl })
-      if (onCorrect) {
-        onCorrect()
-      }
-      // Wait some time before shutting down to allow the user to see the correct answer
-      new Promise((resolve) => setTimeout(resolve, 2000)).then(() => {
-        onShutdown()
+      res.render('pass', {
+        pullRequestUrl,
+        attempts: req.session.attempts,
+        maxAttempts
       })
+      onQuizPassed(req.session.attempts)
     } else {
-      res.render('incorrect')
-      if (onIncorrect) {
-        onIncorrect()
+      const attemptsLeft =
+        maxAttempts > 0 ? maxAttempts - req.session.attempts : Math.Infinity
+      if (attemptsLeft <= 0) {
+        res.render('fail', { pullRequestUrl })
+        onQuizFailed(req.session.attempts)
+      } else {
+        res.render('tryagain', { pullRequestUrl, attemptsLeft })
       }
     }
   })

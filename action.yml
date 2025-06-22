@@ -36,6 +36,12 @@ inputs:
       from running indefinitely.
     required: false
     default: '10'
+  max-attempts:
+    description:
+      The maximum number of attempts to pass the quiz. A value of 0 means
+      unlimited attempts.
+    required: false
+    default: '3'
   exclude-file-patterns:
     description:
       A list of file patterns to exclude from the quiz as a JSON-ified string.
@@ -70,6 +76,7 @@ runs:
         INPUT_NGROK_AUTHTOKEN: ${{ inputs.ngrok-authtoken }}
         INPUT_LINES_CHANGED_THRESHOLD: ${{ inputs.lines-changed-threshold }}
         INPUT_TIME_LIMIT_MINUTES: ${{ inputs.time-limit-minutes }}
+        INPUT_MAX_ATTEMPTS: ${{ inputs.max-attempts }}
         INPUT_EXCLUDE_FILE_PATTERNS: ${{ inputs.exclude-file-patterns }}
         INPUT_MODEL: ${{ inputs.model }}
         INPUT_SYSTEM_PROMPT: ${{ inputs.system-prompt }}

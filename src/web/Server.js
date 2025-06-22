@@ -1,13 +1,13 @@
 import ngrok from '@ngrok/ngrok'
 
 class Server {
-  constructor({ port = 3000, createApp, ngrokAuthToken }) {
+  constructor({ app, port = 3000, ngrokAuthToken }) {
+    this.app = app
     this.port = port
     this.connections = new Set()
     this.server = null
     this.listener = null
     this.ngrokUrl = null
-    this.createApp = createApp
     this.ngrokAuthToken = ngrokAuthToken
     this.shouldLog = process.env.GITHUB_ACTIONS !== 'true'
   }
@@ -19,9 +19,7 @@ class Server {
   }
 
   async start() {
-    const app = this.createApp(this.shutdown.bind(this))
-
-    this.server = app.listen(this.port, () => {
+    this.server = this.app.listen(this.port, () => {
       this.log(`Server running on port ${this.port}`)
     })
 
@@ -38,23 +36,25 @@ class Server {
           this.log(`Ngrok status: ${status}`)
         }
       })
-      this.ngrokUrl = this.listener.url()
-      this.log(`Ngrok URL: ${this.ngrokUrl}`)
     }
   }
 
   getUrl() {
-    return this.ngrokUrl
+    if (this.listener) {
+      return this.listener.url()
+    } else {
+      return `http://localhost:${this.port}`
+    }
   }
 
   async shutdown() {
     this.log('Shutting down...')
     this.connections.forEach((socket) => socket.destroy())
     this.server.close(async () => {
-      await this.listener.close()
-      process.exit(0)
+      if (this.listener) {
+        await this.listener.close()
+      }
     })
-    setTimeout(() => process.exit(1), 5000)
   }
 }
 

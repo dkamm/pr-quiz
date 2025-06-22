@@ -21,6 +21,9 @@
 </head>
 <body>
   <div class="quiz-container">
+    <% if (maxAttempts > 0) { %>
+      <p class="attempt-counter">Attempt <%= attempt %> of <%= maxAttempts %></p>
+    <% } %>
     <h1>📝 PR Quiz</h1>
     <form action="/submit" method="POST">
       <% quiz.questions.forEach((q, index) => { %>
