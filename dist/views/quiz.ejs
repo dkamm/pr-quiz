@@ -33,7 +33,7 @@
             <label>
               <input type="radio" name="<%= index %>" value="<%= letter %>" <% if (answers && answers[index.toString()] === letter) { %>checked<% } %> required>
               <%= letter.toUpperCase() %>. <%- marked.parseInline(text) %>
-            </label><br>
+            </label>
           <% }) %>
         </div>
       <% }) %>
