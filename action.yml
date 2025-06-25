@@ -23,7 +23,7 @@ inputs:
       The model to use for generating the quiz.  It must be a model that
       supports structured outputs. Defaults to 'gpt-4o'.
     required: false
-    default: 'gpt-4o'
+    default: 'o4-mini'
   lines-changed-threshold:
     description:
       The minimum number of lines changed required to create a quiz. This is to
