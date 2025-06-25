@@ -14,6 +14,7 @@ For each question:
 - Make all options realistic (no obviously wrong answers)
 - The correct answer should require understanding the actual changes
 - Wrong answers should represent plausible misunderstandings
+- Use backticks to format file paths, code snippets, etc
 
 Focus areas:
 - Logic changes and their implications
