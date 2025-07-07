@@ -55089,6 +55089,7 @@ For each question:
 - Make all options realistic (no obviously wrong answers)
 - The correct answer should require understanding the actual changes
 - Wrong answers should represent plausible misunderstandings
+- Use backticks to format file paths, code snippets, etc
 
 Focus areas:
 - Logic changes and their implications
@@ -55198,7 +55199,9 @@ async function run() {
     // Wait some time before shutting down to allow user to see rendered page
     setTimeout(async () => {
       await server.shutdown();
-    }, 2000);
+      // Exit explicitly because the quiz time limit timeout is still active
+      process.exit(0);
+    }, 1000);
   };
   const onQuizFailed = (attempts) => {
     coreExports.setFailed(
@@ -55208,7 +55211,7 @@ async function run() {
     setTimeout(async () => {
       await server.shutdown();
       process.exit(1);
-    }, 2000);
+    }, 1000);
   };
   server = new Server({
     app: createApp({
