@@ -46,14 +46,14 @@
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.11.1",
-    "@ngrok/ngrok": "^1.5.1",
+    "@ngrok/ngrok": "^1.5.2",
     "@rollup/plugin-json": "^6.1.0",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
-    "express-session": "^1.18.1",
+    "express-session": "^1.18.2",
     "marked": "^15.0.12",
     "openai": "^5.3.0",
-    "picomatch": "^4.0.2",
+    "picomatch": "^4.0.3",
     "zod": "^3.25.63"
   },
   "devDependencies": {
